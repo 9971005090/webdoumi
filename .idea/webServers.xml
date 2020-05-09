@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="426eeae1-8c5f-49ab-9dcc-0d2a81b9a4d2" name="a9971005090.dothome.co.kr / a9971005090 / dbstjrdud1!" url="http://112.175.184.75">
+        <fileTransfer host="112.175.184.75" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+          <option name="port" value="21" />
+        </fileTransfer>
+      </webServer>
+      <webServer id="e4c44060-2f99-46b0-a854-710fc995bd75" name="seokiyo.raonnet.com" url="http://seokiyo.raonnet.com">
+        <fileTransfer host="seokiyo.raonnet.com" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+          <option name="port" value="21" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
