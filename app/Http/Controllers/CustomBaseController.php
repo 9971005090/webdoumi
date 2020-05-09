@@ -145,7 +145,7 @@ class CustomBaseController extends Controller
                 {
                     return redirect($this->base_url.'/admin/user/login_form')->with('error', '관리자만 접속이 가능합니다');
                 }
-                if(Auth::user()->confirmed !== true1)
+                if(Auth::user()->confirmed !== true)
                 {
                     return redirect($this->base_url.'/admin/user/login_form')->with('error', '관리자만 접속이 가능합니다');
                 }
