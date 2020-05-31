@@ -24,6 +24,6 @@ class ErrorController extends CustomBaseController
         {
             $service_type = $request->session()->get("service_type");
         }
-        return view('error.landing', ['service_type' => $service_type]);
+        return view('error/landing', ['service_type' => $service_type]);
     }
 }

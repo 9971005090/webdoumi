@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\User;
 use App\Role;
+use App\UserVerify;
 use Illuminate\Support\Facades\Hash;
 use App\Events\FireLoginSuccessful;
 use Illuminate\Support\Facades\Config;
@@ -13,14 +14,18 @@ use Illuminate\Support\Facades\Config;
 use App\Events\UserEventLoginSuccessfulForSendEmail;
 use Illuminate\Support\Facades\Mail;
 use App\Jobs\SendEmailJob;
+
 use Carbon\Carbon;
 use App\Jobs\SendWelcomeEmail;
+use App\Jobs\SendVerifyEmail;
 use Illuminate\Support\Facades\Route;
 //use Route;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Crypt;
+use App\Helpers\Custom\Utils As CustomUtils;
 
 class UserController extends CustomBaseController
 {
@@ -66,7 +71,6 @@ class UserController extends CustomBaseController
 
     public function login_form()
     {
-        dd(phpinfo());
         /*
         $to_name = "윤석영";
         $to_email = "9971005090@naver.com";
@@ -195,15 +199,24 @@ class UserController extends CustomBaseController
         return redirect('/user/login_form')->with('error', '잘못된 아이디 또는 패스워드입니다. 다시 입력해주세요!');
     }
 
+    public function logout()
+    {
+        Auth::logout();
+        return redirect('/');
+    }
+
     public function join_form()
     {
         return view('user/join');
     }
 
-    public function logout()
+    public function join_end()
     {
-        Auth::logout();
-        return redirect('/');
+        if(session()->has('user_id') === false)
+        {
+            return redirect('/error')->with('error', '잘못된 접근입니다!');
+        }
+        return view('user/join_end');
     }
 
     public function join(Request $request)
@@ -212,36 +225,104 @@ class UserController extends CustomBaseController
 
         /*
         $validator = Validator::make($request->all(), User::$validate['join']['rule'], User::$validate['join']['message']);
-
         if ($validator->fails()) {
             return redirect('user/join_form')
                 ->withErrors($validator)
                 ->withInput();
         }
         */
+        $user_object = new User;
+        $user = $user_object->run_create($request);
 
         ## 일반 사용자 권한 조회
-        $user_role = Role::where('name', Config::get('DB.ROLE.NAME.USER'))->first();
-        if($user_role == null)
+        if($user['code'] == 200)
         {
-            return redirect('/user/join_form')->with('error', '지금은 회원 가입을 할 수 없습니다. 나중에 다시 시도해주세요.')->withInput();
-        }
-        $user = User::create([
-            'role_name' => $user_role->name,
-            'user_name' => $request['user_name'],
-            'real_name' => $request['real_name'],
-            'email' => $request['email'],
-            'password' => Hash::make($request['pass']),
-        ]);
-        if($user)
-        {
-            return redirect('/');
+            $user_verify_object = new UserVerify;
+            $user_verify_object->run_create($user['data_object']);
+            $pass_user = $user_object->get_info($user['data_object']->id, "id", 1, "UserProfile");
+            $pass_parameter = array('user' => $pass_user);
+            $email_verify_Job = new SendVerifyEmail($pass_parameter);
+            SendVerifyEmail::dispatch($email_verify_Job);
+
+            return redirect('/user/join_end')->with('user_id', $user['data_object']->id);
         }
         else
         {
-            return redirect('/user/join_form')->with('error', '지금은 회원 가입을 할 수 없습니다. 나중에 다시 시도해주세요.')->withInput();
+            return redirect('/user/join_form')->with('error', $user['msg'])->withInput();
         }
+    }
 
+
+    /**
+     * 이메일 인증 처리 액션
+     *
+     * @param string $token 이메일 인증 토큰 값 (구성은 users.id @||@ users.user_name)
+     * @param integer $cascade 정보 조회시 하위 릴레이션 테이블의 추가 조회 여부
+     * @param string $except 하위 릴레이션 테이블 조회시 제외 테이블 정보(문자열로 처리 , 구분자 예:'UserProfile,UserVerify')
+     * @return null 또는 데이타 객체
+     */
+    public function email_verify_confirm(Request $request, $token)
+    {
+        $result = array(
+            'code' => 200,
+            'msg' => null
+        );
+        if($token == null)
+        {
+            $result['code'] = 400;
+            $result= '잘못된 접근입니다!';
+        }
+        
+        # 토큰이 유효한 값인지 조회(암호화를 풀어서 변수가 3개가 되는지 확인 후 디비에서 확인)
+        $decrypted = Crypt::decryptString($token);
+        $temp = explode("@||@", $decrypted);
+        if ($result['code'] != 400 && count($temp) != 3)
+        {
+            $result['code'] = 400;
+            $result['msg'] = '유효한 토큰값이 아닙니다!';
+        }
+        $user_verify_object = new UserVerify;
+        $verify = $user_verify_object->get_info($token, "token");
+        if ($result['code'] != 400 && $verify == null)
+        {
+            $result['code'] = 400;
+            $result['msg'] = '유효한 토큰값이 아닙니다!!';
+        }
+        
+        # 디비에 입력된 참조값과 토큰에서 확인된 참조값을 확인하여 맞는지 확인, 이미 사용한것인지 확인, 만료 시간이 지났는지 확인
+        $today = CustomUtils::get_today("Y-m-d H:i:s", "UTC");
+        if ($result['code'] != 400 && $verify['user_id'] != $temp[0])
+        {
+            $result['code'] = 400;
+            $result['msg'] = '유효한 토큰값이 아닙니다!!!';
+        }
+        if ($result['code'] != 400 && $verify['is_expire'] === true)
+        {
+            $result['code'] = 400;
+            $result['msg'] = '유효한 토큰값이 아닙니다!!!!';
+        }
+        if ($result['code'] != 400 && $verify['token_limited_at'] < $today)
+        {
+            $result['code'] = 400;
+            $result['msg'] = '유효한 토큰값이 아닙니다!!!!!';
+        }
+        
+        # users.email_verified_at, user_verifies.token_used_at, user_verifiles.is_expire 업데이트
+        $user_object = new User;
+        $update = $user_object->run_update_email_verified($verify['user_id'], $today);
+        if ($result['code'] != 400 && $update <= 0)
+        {
+            $result['code'] = 400;
+            $result['msg'] = '인증에 실패했습니다. 잠시후에 다시 시도해주세요!';
+        }
+        $update = $user_verify_object->run_update_use_token($verify['id'], $today);
+        if ($result['code'] != 400 && $update <= 0)
+        {
+            $result['code'] = 400;
+            $result['msg'] = '인증에 실패했습니다. 잠시후에 다시 시도해주세요!';
+        }
+        
+        return view('user/email_verify_confirm', array('result' => $result));
     }
 
 
@@ -384,7 +465,6 @@ class UserController extends CustomBaseController
                 }
             }
         }
-
         $this->validate($request, $rule, $message);
         $user = User::where('id', $id)->first();
         $update = $user->update(["real_name" => $request['real_name'], "email" => $request['email']]);

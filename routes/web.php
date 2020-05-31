@@ -154,10 +154,18 @@ Route::get('/{controller_name}',
         //var_dump($controller_name, $function_name);
         $request = request();
         $app = app();
-        $controller = $app->make('\App\Http\Controllers\\'.ucfirst($controller_name).'Controller');
-        return $controller->callAction("index", $parameters = array(
-            'request' => $request
-        ));
+        try 
+        {            
+            $controller = $app->make('\App\Http\Controllers\\'.ucfirst($controller_name).'Controller');
+            return $controller->callAction("index", $parameters = array(
+                'request' => $request
+            ));
+        } 
+        catch (Exception $e) 
+        {
+            $msg = "'".url()->current()."' 잘못된 접근입니다!";
+            return redirect('/error')->with('error', $msg);
+        }
     });
 
 

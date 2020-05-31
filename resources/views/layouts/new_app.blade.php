@@ -41,10 +41,10 @@
                         <!-- Authentication Links -->
                         @guest
                             <li class="nav-item">
-                                <a class="nav-link" href="/user/login_form">{{ __('Login') }}</a>
+                                <a class="nav-link" href="{{ url('/user/login_form') }}">{{ __('Login') }}</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="/user/join_form">{{ __('Register') }}</a>
+                                <a class="nav-link" href="{{ url('/user/join_form') }}">{{ __('Register') }}</a>
                             </li>
                         @else
                             <li class="nav-item dropdown">
@@ -53,27 +53,27 @@
                                 </a>
 
                                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                                    <a class="dropdown-item" href="/user/logout"
+                                    <a class="dropdown-item" href="{{ url('/user/logout') }}"
                                        onclick="event.preventDefault();document.getElementById('logout-form').submit();">
                                         {{ __('Logout') }}
                                     </a>
-                                    <form id="logout-form" action="/user/logout" method="POST" style="display: none;">
+                                    <form id="logout-form" action="{{ url('/user/logout') }}" method="POST" style="display: none;">
                                         @csrf
                                     </form>
 
-                                    <a class="dropdown-item" href="/user/edit_form"
+                                    <a class="dropdown-item" href="{{ url('/user/edit_form') }}"
                                        onclick="event.preventDefault();document.getElementById('edit-form').submit();">
                                         {{ __('Edit') }}
                                     </a>
-                                    <form id="edit-form" action="/user/edit_form/{{ Auth::user()->id }}" method="POST" style="display: none;">
+                                    <form id="edit-form" action="{{ url('/user/edit_form/'.Auth::user()->id) }}" method="POST" style="display: none;">
                                         @csrf
                                     </form>
 
-                                    <a class="dropdown-item" href="/user/leave"
+                                    <a class="dropdown-item" href="{{ url('/user/leave') }}"
                                        onclick="event.preventDefault();document.getElementById('leave-form').submit();">
                                         {{ __('Leave') }}
                                     </a>
-                                    <form id="leave-form" action="/user/leave" method="POST" style="display: none;">
+                                    <form id="leave-form" action="{{ url('/user/leave') }}" method="POST" style="display: none;">
                                         @csrf
                                     </form>
                                 </div>

@@ -46,6 +46,21 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
+        if ($this->isHttpException($exception)) {
+
+            $statusCode = $exception->getStatusCode();
+            if ($statusCode == "404" || $statusCode == "500")
+            {
+                $msg = "'".url()->current()."' 잘못된 접근입니다!";
+                session()->put('error', $msg);
+                session()->save();
+                return redirect('/error')->with('error', $msg);
+            }
+        }
+        if (get_class($exception) == "BadMethodCallException" || get_class($exception) == "ReflectionException") {
+            $msg = "'".url()->current()."' 잘못된 접근입니다!";
+            return redirect('/error')->with('error', $msg);
+        }
         return parent::render($request, $exception);
     }
 }

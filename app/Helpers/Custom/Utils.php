@@ -38,7 +38,7 @@ class Utils
             $result['msg'] = "잘못된 요청입니다.";
             return $result;
         }
-        $user = $model::get_info($id, $cascade);
+        $user = $model::get_info($id, "id", $cascade);
         if($user === null)
         {
             $process_type_string = "삭제";
@@ -218,7 +218,55 @@ class Utils
     public static function get_today($format, $timezone="Asia/Seoul")
     {
         $dt = new DateTime(date('Y-m-d H:i:s', time()), new DateTimeZone('UTC'));
-        $dt->setTimezone(new DateTimeZone($timezone));
+        if ($timezone != "UTC")
+        {
+            $dt->setTimezone(new DateTimeZone($timezone));
+        }
         return $dt->format($format);
+    }
+
+
+    /**
+     * 특정일 한글일
+     *
+     * @param string $date_string 날짜 문자열(2020-12-23)
+     * @param string $date_full_name 응답시 '요일'을 붙일지 여부
+     * @param string $timezone 타임존
+     *
+     * @return string
+     * @throws
+     */
+    public static function get_weekday_string($date_string=null, $date_full_name=true, $timezone="Asia/Seoul")
+    {
+        $week_strings = array("월요일" , "화요일" , "수요일" , "목요일" , "금요일" ,"토요일", "일요일");       
+        $date_string = $date_string == null ? date('Y-m-d', time()) : $date_string;
+        $dt = new DateTime($date_string, new DateTimeZone('UTC'));
+        $week_number = $dt->format('N') - 1;
+        if ($date_full_name === true)
+        {
+            return $week_strings[$week_number];
+        }
+        else
+        {
+            return str_replace("요일", "", $week_strings[$week_number]);
+        }
+    }
+
+
+    /**
+     * 일정 시간 이후 날짜
+     *
+     * @param string $after_term 이후 시간(추가하려는 시간)
+     * @param string $timezone 특정 시간이후 설정이 필요할 경우의 특정시간
+     *
+     * @return string
+     * @throws
+     */
+    public static function get_after_date($after_term, $date_string=null)
+    {
+        $date_string = $date_string == null ? date('Y-m-d 00:00:00', time()) : $date_string;
+        $dt = new DateTime($date_string, new DateTimeZone('UTC'));
+        $dt->modify($after_term);
+        return $dt->format('Y-m-d H:i:s');
     }
 }

@@ -166,7 +166,7 @@ class CustomBaseController extends Controller
                 }
                 if(Auth::user()->confirmed !== true)
                 {
-                    return redirect($this->base_url.'/admin/user/login_form')->with('error', '관리자만 접속이 가능합니다');
+                    return redirect($this->base_url.'/user/login_form')->with('error', '가입 승인 처리가 되지 않았습니다. 관리자에게 문의하세요!');
                 }
             }
         }
