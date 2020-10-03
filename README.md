@@ -29,6 +29,9 @@
 - 관리자 회원 정보 데이타 입력 seed 실행(회원 정보 : admin / 111111)
     - composer dump-autoload
     - php artisan db:seed
+- smtp 설정(gmail 사용을 원할 경우)
+    - https://medium.com/@agavitalis/how-to-send-an-email-in-laravel-using-gmail-smtp-server-53d962f01a0c
+    - 다른 smtp 설정시 메일 발송 부분 설정 필요
 
 # 사이트 동작 확인 
 - 서버 실행
