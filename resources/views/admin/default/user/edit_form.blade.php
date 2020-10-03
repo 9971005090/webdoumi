@@ -87,7 +87,7 @@
                                 <div class="position-relative row form-group">
                                     <label class="col-sm-3 col-form-label">{{ __('전화번호') }}</label>
                                     <div class="col-sm-9">
-                                        <input id="phone" type="text" class="form-control @error('phone') is-invalid @enderror" name="phone" value="{{ old('phone') ?? (old('is_requested') == null ? $user->UserProfile->phone : null) }}">
+                                        <input id="phone" type="text" class="form-control @error('phone') is-invalid @enderror" name="phone" value="{{ old('phone') ?? (old('is_requested') == null ? ($user->UserProfile != null ? $user->UserProfile->phone : null) : null) }}">
 
                                         @error('phone')
                                         <span class="invalid-feedback" role="alert">
@@ -100,7 +100,7 @@
                                 <div class="position-relative row form-group">
                                     <label class="col-sm-3 col-form-label">{{ __('휴대폰번호') }}</label>
                                     <div class="col-sm-9">
-                                        <input id="mobile_phone" type="text" class="form-control @error('mobile_phone') is-invalid @enderror" name="mobile_phone" value="{{ old('mobile_phone') ?? (old('is_requested') == null ? $user->UserProfile->mobile_phone : null) }}">
+                                        <input id="mobile_phone" type="text" class="form-control @error('mobile_phone') is-invalid @enderror" name="mobile_phone" value="{{ old('mobile_phone') ?? (old('is_requested') == null ? ($user->UserProfile != null ? $user->UserProfile->mobile_phone : null) : null) }}">
 
                                         @error('mobile_phone')
                                         <span class="invalid-feedback" role="alert">
@@ -114,11 +114,11 @@
                                     <label class="col-sm-3 col-form-label">{{ __('성별') }}</label>
                                     <div class="col-sm-9 form-inline" >
                                         <div class="custom-control custom-radio mb-1">
-                                            <input id="gender" type="radio" class="custom-control-input" name="gender" value="M"{{ old('gender') == null ? ($user->UserProfile->gender == 'M' ? ' checked' : null) : (old('gender') == 'M' ? ' checked' : null) }}>
+                                            <input id="gender" type="radio" class="custom-control-input" name="gender" value="M"{{ old('gender') == null ? (($user->UserProfile != null ? ($user->UserProfile->gender == 'M' ? ' checked' : null) : null)) : (old('gender') == 'M' ? ' checked' : null) }}>
                                             <label class="custom-control-label" for="gender">남성</label>
                                         </div>
                                         <div class="custom-control custom-radio mb-1" style="margin-left:20px;">
-                                            <input id="gender" type="radio" class="custom-control-input" name="gender" value="F"{{ old('gender') == null ? ($user->UserProfile->gender == 'F' ? ' checked' : null) : (old('gender') == 'F' ? ' checked' : null) }}>
+                                            <input id="gender" type="radio" class="custom-control-input" name="gender" value="F"{{ old('gender') == null ? (($user->UserProfile != null ? ($user->UserProfile->gender == 'F' ? ' checked' : null) : null)) : (old('gender') == 'F' ? ' checked' : null) }}>
                                             <label class="custom-control-label" for="gender">여성</label>
                                         </div>
                                         <input type="hidden" class="form-control @error('gender') is-invalid @enderror">
@@ -134,7 +134,7 @@
                                     <label class="col-sm-3 col-form-label">{{ __('생일') }}</label>
                                     <div class="col-sm-3">
                                         <div class="input-group date">
-                                            <input type="text" id="birthday" class="form-control @error('birthday') is-invalid @enderror" name="birthday" value="{{ old('birthday') ?? (old('is_requested') == null ? \App\Helpers\Custom\Utils::get_date_change($user->UserProfile->birthday, "Asia/Seoul", 'Y-m-d') : null) }}">
+                                            <input type="text" id="birthday" class="form-control @error('birthday') is-invalid @enderror" name="birthday" value="{{ old('birthday') ?? (old('is_requested') == null ? ($user->UserProfile != null ? \App\Helpers\Custom\Utils::get_date_change($user->UserProfile->birthday, "Asia/Seoul", 'Y-m-d') : null) : null) }}">
                                             <div class="input-group-append">
                                                 <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
                                             </div>
@@ -182,12 +182,12 @@
                                     <label class="col-sm-3 col-form-label">{{ __('우편번호') }}</label>
                                     <div class="col-sm-4">
                                         <div class="input-group">
-                                            <input type="text" id="zipcode" class="form-control @error('zipcode') is-invalid @enderror" name="zipcode" value="{{ old('zipcode') ?? (old('is_requested') == null ? $user->UserProfile->zipcode : null) }}">
+                                            <input type="text" id="zipcode" class="form-control @error('zipcode') is-invalid @enderror" name="zipcode" value="{{ old('zipcode') ?? (old('is_requested') == null ? ($user->UserProfile != null ? $user->UserProfile->zipcode : null) : null) }}">
                                             <div class="input-group-append">
                                                 <span class="input-group-text"><a onclick="zipcode_edit()"><i class="fas fa-pencil-alt"></i></a></span>
                                             </div>
                                         </div>
-
+                                        
                                         @error('zipcode')
                                         <span class="invalid-feedback" role="alert">
                                             <strong>{{ $message }}</strong>
@@ -219,8 +219,8 @@
                                 <div class="position-relative row form-group">
                                     <label class="col-sm-3 col-form-label">{{ __('기본주소') }}</label>
                                     <div class="col-sm-9">
-                                        <input type="text" id="address1" class="form-control @error('address1') is-invalid @enderror" name="address1" value="{{ old('address1') ?? (old('is_requested') == null ? $user->UserProfile->address1 : null) }}">
-
+                                        <input type="text" id="address1" class="form-control @error('address1') is-invalid @enderror" name="address1" value="{{ old('address1') ?? (old('is_requested') == null ? ($user->UserProfile != null ? $user->UserProfile->address1 : null) : null) }}">
+                                        
                                         @error('address1')
                                         <span class="invalid-feedback" role="alert">
                                             <strong>{{ $message }}</strong>
@@ -232,7 +232,7 @@
                                 <div class="position-relative row form-group">
                                     <label class="col-sm-3 col-form-label">{{ __('상세주소') }}</label>
                                     <div class="col-sm-9">
-                                        <input type="text" id="address2" class="form-control @error('address2') is-invalid @enderror" name="address2" value="{{ old('birthday') ?? (old('is_requested') == null ? $user->UserProfile->address2 : null) }}">
+                                        <input type="text" id="address2" class="form-control @error('address2') is-invalid @enderror" name="address2" value="{{ old('birthday') ?? (old('is_requested') == null ? ($user->UserProfile != null ? $user->UserProfile->address2 : null) : null) }}">
 
                                         @error('address2')
                                         <span class="invalid-feedback" role="alert">
@@ -285,7 +285,9 @@
 
     <stype>
     <script>
-        @if ( $user->UserProfile->birthday === null )
+        @if ( $user->UserProfile == null)
+            $('.date').datepicker({format: "yyyy-mm-dd"}).datepicker("setDate", new Date());
+        @elseif ( $user->UserProfile->birthday === null )
             $('.date').datepicker({format: "yyyy-mm-dd"}).datepicker("setDate", new Date());
         @elseif ( old('is_requested') == null )
             var birthday = " {{ \App\Helpers\Custom\Utils::get_date_change($user->UserProfile->birthday) }} ";
