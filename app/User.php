@@ -164,7 +164,7 @@ class User extends Authenticatable
             return null;
         }
         $where = array();
-        array_push($where, array($column, '=', $user_id));
+        array_push($where, array($column, '=', $find_value));
         $user = User::where($where)->first();
         //$user = User::with('UserProfile')->where([['id', '=', $id]])->first(); 이렇게 하면 하위 릴레이션 테이블로 조회가 된다
 
