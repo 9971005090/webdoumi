@@ -170,8 +170,8 @@ class UserController extends CustomBaseController
             //$data = $request->session()->all();
             //event(new UserEventLoginSuccessfulForSendEmail());
 
-            $emailJob = new SendWelcomeEmail(Auth::user());
-            SendWelcomeEmail::dispatch($emailJob);
+            // $emailJob = new SendWelcomeEmail(Auth::user());
+            // SendWelcomeEmail::dispatch($emailJob);
             //$result = event(new UserEventLoginSuccessful($request, Auth::user()->id));
             $result = event(new FireLoginSuccessful(Auth::user(), $request));
             if(is_array($result) === true)
