@@ -11,6 +11,9 @@
 # php extension 설치(현재 서버에 설치가 되어 있다면 단계 무시, 설치가 안되어 있을 경우 composer 패키지 설치시 에러가 날수 있음)
 - sudo apt-get install openssl php-common php-curl php-json php-mbstring php-mysql php-xml php-zip
 
+# SQLSTATE[HY000]: General error: 1709 Index column size too large. The maximum column size is 767 bytes(게시판 인덱스 설정시 에러남)
+- https://vitux.com/debian-mariadb-large-index/
+
 # 설치순서
 - git 설치(아래 주소를 참고하여 설치)
     - https://git-scm.com/book/ko/v2/시작하기-Git-설치

@@ -28,7 +28,7 @@ class AddManyToUsers extends Migration
             $table->boolean('agree_to_advertise')->default(false)->after('joined')->comment('광고성내용 수신 동의여부');
             $table->dateTimeTz('setup_to_advertise')->nullable(true)->after('agree_to_advertise')->comment('광고성내용 설정 시간');
             $table->string('user_name', 50)->change();
-            $table->foreign('role_name')->references('name')->on('roles')->onDelete('set null');
+            $table->foreign('role_name', 'users_role_name_foreign')->references('name')->on('roles')->onDelete('set null')->onUpdate('cascade');
         });
     }
 
@@ -40,6 +40,8 @@ class AddManyToUsers extends Migration
     public function down()
     {
         Schema::table('users', function (Blueprint $table) {
+            $table->dropForeign('users_role_name_foreign');
+            $table->dropColumn('role_name');
             $table->dropColumn('real_name');
             $table->dropColumn('confirmed');
             $table->dropColumn('suspended');
