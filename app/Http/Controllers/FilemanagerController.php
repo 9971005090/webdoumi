@@ -38,12 +38,13 @@ class FilemanagerController extends CustomBaseController
          */
         $validate = [
             'rule' => [
-                'file' => 'required|max:10240|mimes:tff,woff'//kb
+                // 'file' => 'required|max:10240|mimes:tff,woff'//kb
+                'file' => 'required|max:10240|mimes:jpeg,png,jpg,gif,svg'//kb
             ],
             'message' => [
                 'file.required' => '파일을 선택하세요!',
                 'file.max' => '10kb를 초과할 수 없습니다!',
-                'file.mimes' => 'tff,woff의 파일만 등록됩니다!'
+                'file.mimes' => 'jpeg,png,jpg,gif,svg의 파일만 등록됩니다!'
             ]
         ];
         #$this->validate($request, $validate['rule'], $validate['message']);
@@ -55,7 +56,7 @@ class FilemanagerController extends CustomBaseController
             return response()->json(['error'=>$validator->errors()->all()], 400);
         }
 
-        return response()->json(['error'=>"1234"], 400);
+        // return response()->json(['error'=>"1234"], 400);
         $request['file']->store("test");
 
         $file = [
@@ -68,8 +69,14 @@ class FilemanagerController extends CustomBaseController
             'file_size' => $request['file']->getSize(),
             'file_size_string' => CustomUtils::get_file_size($request['file']->getSize())
         ];
-        echo Config::get('filesystems.disks.local.root');
+        // echo Config::get('filesystems.disks.local.root');
         $upload = UploadFile::create($file);
+        return response()->json(
+            [
+                'result' => true,
+                'file' => $upload
+            ], 
+        200);
         //Storage::delete('test/gCfaekazEkHDA9GvEduX1F9ICVAMLUfw25Drva4D.zip');
 
     }
