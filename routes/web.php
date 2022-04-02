@@ -23,7 +23,7 @@
 
 Route::get('/admin/{controller_name?}/{function_name?}/{query?}/{query2?}',
     function ($controller_name = "user", $function_name = "index", $query = null, $query2 = null) {
-        //var_dump($controller_name, $function_name, $query, $query2);
+        // var_dump($controller_name, $function_name, $query, $query2);
         $request = request();
         $app = app();
         $controller = $app->make('\App\Http\Controllers\Admin\\'.'Admin'.ucfirst($controller_name).'Controller');

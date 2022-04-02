@@ -1,6 +1,6 @@
 <?php
 /**
- * webdoumi 기업형 홈페이지 제작 패키지에서 사용되는 관리자 > 회원관리 controller
+ * webdoumi 기업형 홈페이지 제작 패키지에서 사용되는 관리자 > 게시판관리 controller
  *
  * @author seokiyo <9971005090@naver.com>
  * @package App\Http\Controllers\Admin
@@ -11,41 +11,23 @@ namespace App\Http\Controllers\Admin;
 
 use App\Events\FireLoginSuccessful;
 use App\Http\Controllers\CustomBaseController;
-use App\Role;
-use App\User;
-use App\UploadFile;
+use App\Models\Admin\BoardInfo;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Controller;
 use DateTime;
 use Illuminate\Support\Arr;
-use App\Helpers\Thirdparty\Snoopy;
 use App\Helpers\Custom\Utils As CustomUtils;
-use App\Helpers\Test;
 
 
-class AdminUserController extends CustomBaseController
+class AdminBoardInfoController extends CustomBaseController
 {
-    /**
-     * username
-     * - 로그인시 사용되는 아이디에 해당하는 칼럼명
-     *
-     * @var string
-     */
-    protected $username;
-
-    /**
-     * snoopy
-     * - http 통신(주소검색) 패키지인 snoopy를 핼퍼로 등록하고 사용하기 위함
-     *
-     * @var object
-     */
-    protected $snoopy;
+    
 
     /**
      * data_model
@@ -62,19 +44,13 @@ class AdminUserController extends CustomBaseController
      *
      * @var array
      */
-    public $except_parameter = array("user_name", "real_name", "email", "is_requested");
+    // public $except_parameter = array("user_name", "real_name", "email", "is_requested");
+    public $except_parameter = array();
 
 
-    /**
-     * 초기화 함수
-     *
-     * @param Snoopy $snoopy helpers에 정의된 외부 패키지를 controller 생성시 주입하여 사용되는 변수
-     *
-     * @return void
-     */
-    public function __construct(Snoopy $snoopy)
+
+    public function __construct()
     {
-        $this->snoopy = $snoopy;
         $this->auth = array(
             'user' => null,
             'admin' => array("all")
@@ -82,10 +58,8 @@ class AdminUserController extends CustomBaseController
         $this->admin = true;
         $this->user = false;
         $this->redirect_type = "login_form"; //login_form, error_page
-        $this->username = $this->findUsername();
-        $this->data_model = User::class;
-        /*
-         * 해당 컨틀롤러에서 오버라이딩시 사용
+        $this->data_model = BoardInfo::class;
+
         $this->search_form_select_options = array(
             'per_page' => array(
                 10 => "10개 보기",
@@ -93,82 +67,17 @@ class AdminUserController extends CustomBaseController
                 30 => "30개 보기"
             ),
             'order_by' => array(
-                'id||desc' => "가입일↓",
-                'id||asc' => "가입일↑"
+                'id||desc' => "등록일↓",
+                'id||asc' => "등록일↑"
+            ),
+            'type' => BoardInfo::$type,
+            'search_method' => array(
+                'all' => "전체",
+                'title' => "이름"
             )
         );
-        */
+        $this->search_form_select_options['type'] = array('all' => '전체') + $this->search_form_select_options['type'];
     }
-
-
-    /**
-     * 관리자 로그인 페이지
-     *
-     * @return view()에 처리된 html 결과
-     */
-    public function login_form()
-    {
-        return view('admin/default/user/login_form');
-    }
-
-
-    /**
-     * 관리자 로그인 처리
-     *
-     * @param Request $request request 객체
-     *
-     * @return redirect_url 정의 되어 있다면, 해당 url로 없을경우 /admin으로 이동
-     * @throws
-     */
-    public function login(Request $request)
-    {
-        $this->validate($request, User::$validate['login']['rule'], User::$validate['login']['message']);
-
-        if (Auth::attempt(['user_name' => $request->user_name, 'password' => $request->pass]))
-        {
-            # 로그인 후 이벤트 처리
-            $result = event(new FireLoginSuccessful(Auth::user(), $request));
-            if(is_array($result) === true)
-            {
-                if($result[0] === true)
-                {
-                    # redirect_url 값은 CustomBaseController->callAction에서 정의함
-                    if($request->session()->has("redirect_url") === true)
-                    {
-                        return redirect($request->session()->pull("redirect_url"));
-                    }
-                    return redirect('/admin');
-                }
-                else
-                {
-                    Auth::logout();
-                    //return redirect('/admin/user/login_form')->with('error', '잘못된 아이디 또는 패스워드입니다. 다시 입력해주세요!');
-                    return redirect('/admin/user/login_form')->withErrors(['pass'=> '잘못된 아이디 또는 패스워드입니다. 다시 입력해주세요!'])->withInput();
-                }
-            }
-            else
-            {
-                Auth::logout();
-                //return redirect('/admin/user/login_form')->with('error', '잘못된 아이디 또는 패스워드입니다. 다시 입력해주세요!');
-                return redirect('/admin/user/login_form')->withErrors(['pass'=> '잘못된 아이디 또는 패스워드입니다. 다시 입력해주세요!'])->withInput();
-            }
-        }
-        //return redirect('/admin/user/login_form')->with('error', '잘못된 아이디 또는 패스워드입니다. 다시 입력해주세요!');
-        return redirect('/admin/user/login_form')->withErrors(['pass'=> '잘못된 아이디 또는 패스워드입니다. 다시 입력해주세요!'])->withInput();
-    }
-
-
-    /**
-     * 관리자 로그아웃 처리
-     *
-     * @return 로그아웃 처리 후 로그인 폼으로 이동
-     */
-    public function logout()
-    {
-        Auth::logout();
-        return redirect('/admin/user/login_form');
-    }
-
 
 
     public function index(Request $request, $query_string)
@@ -184,7 +93,17 @@ class AdminUserController extends CustomBaseController
         $where = array();
         if($request->filled('search_keyword') === true)
         {
-            array_push($where, array('email', 'like', '%'.$request['search_keyword'].'%'));
+            if($request->filled('search_method') === true)
+            {
+                if($request['search_method'] === "all")
+                {
+                    array_push($where, array('title', 'like', '%'.$request['search_keyword'].'%'));
+                }
+                else 
+                {
+                    array_push($where, array($request['search_method'], 'like', '%'.$request['search_keyword'].'%'));
+                }
+            }
         }
         if($request->filled('begin') === true && $request->filled("end") === true)
         {
@@ -203,14 +122,14 @@ class AdminUserController extends CustomBaseController
             $order_by_raw = $temp[0]." ".$temp[1];
         }
 
-        $users = User::where($where)->orderByRaw($order_by_raw)->paginate($request['per_page']);
+        $board_infos = BoardInfo::where($where)->orderByRaw($order_by_raw)->paginate($request['per_page']);
         $queries = DB::getQueryLog();
         //echo "<pre>";
         //print_r($queries);
         //echo "</pre>";
         //dd(date("Y-m-d 00:00:00", time()));
         //dd($parameters['end']);
-        return view('/admin/default/user/index', compact('users', 'form_select_options', 'queries', 'query_string'));
+        return view('/admin/default/board_info/index', compact('board_infos', 'form_select_options', 'queries', 'query_string'));
     }
 
 
@@ -426,27 +345,4 @@ class AdminUserController extends CustomBaseController
 
 
 
-    /**
-     * Get the login username to be used by the controller.
-     *
-     * @return string
-     */
-    public function findUsername()
-    {
-        /*
-        $login = request()->input('email');
-
-        $fieldType = filter_var($login, FILTER_VALIDATE_EMAIL) ? 'email' : 'user_name';
-
-        request()->merge([$fieldType => $login]);
-
-        return $fieldType;
-        */
-        return "user_name";
-    }
-
-    public function username()
-    {
-        return $this->username;
-    }
 }

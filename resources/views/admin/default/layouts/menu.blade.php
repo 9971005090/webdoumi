@@ -15,13 +15,13 @@
     <div class="nav-wrapper">
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a class="nav-link active" href="{{ url("/admin/user/index") }}">
+                <a class="nav-link{{ request() -> is('admin/user/*') ? ' active' : ''}}" href="{{ url("/admin/user/index") }}">
                     <i class="material-icons">edit</i>
                     <span>회원</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link " href="{{ url("/admin/board/index") }}">
+                <a class="nav-link{{ request() -> is('admin/boardInfo/*') ? ' active' : ''}}" href="{{ url("/admin/boardInfo/index") }}">
                     <i class="material-icons">vertical_split</i>
                     <span>게시판</span>
                 </a>

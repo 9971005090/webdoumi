@@ -15,7 +15,7 @@ class CreateBoardCategoriesTable extends Migration
     {
         Schema::create('board_categories', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->bigInteger('board_info_id')->unsigned()->nullable(false)->comment('users 참조키')->index();
+            $table->bigInteger('board_info_id')->unsigned()->nullable(false)->comment('board_infos 참조키')->index();
             $table->string('title', 255)->comment('이름');
             $table->timestamps();
             $table->foreign('board_info_id')->references('id')->on('board_infos')->onDelete('cascade');

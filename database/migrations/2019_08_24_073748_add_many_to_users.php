@@ -29,6 +29,7 @@ class AddManyToUsers extends Migration
             $table->dateTimeTz('setup_to_advertise')->nullable(true)->after('agree_to_advertise')->comment('광고성내용 설정 시간');
             $table->string('user_name', 50)->change();
             $table->foreign('role_name', 'users_role_name_foreign')->references('name')->on('roles')->onDelete('set null')->onUpdate('cascade');
+            // delete 먼저 후 update
         });
     }
 
